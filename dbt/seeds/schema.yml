@@ -1,0 +1,26 @@
+version: 2
+
+seeds:
+  - name: countries
+    description: >
+      The two bidding zones in the study. The standard UTC offset drives the
+      DST test (the skipped and repeated local hour is 01:00 UTC expressed in
+      standard time) and the plausible load bounds drive the range test.
+    columns:
+      - name: country_code
+        data_tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ["ES", "PT"]
+      - name: timezone
+        data_tests:
+          - not_null
+      - name: standard_utc_offset_hours
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false

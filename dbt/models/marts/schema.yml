@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: dim_country
+    columns:
+      - name: country_code
+        data_tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ["ES", "PT"]
+
+  - name: fct_load_hourly
+    description: Hourly system load per country with UTC and local time, gaps imputed and flagged.
+    columns:
+      - name: load_hour_key
+        data_tests:
+          - not_null
+          - unique
+      - name: country_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_country')
+                field: country_code
+      - name: utc_timestamp
+        data_tests:
+          - not_null
+          - recency:
+              arguments:
+                at_least: "2020-09-30 23:00:00"
+      - name: local_timestamp
+        data_tests:
+          - not_null
+      - name: local_hour
+        data_tests:
+          - accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 23
+      - name: load_mw
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 2000
+                max_value: 50000
+
+  - name: fct_load_daily
+    description: Daily energy, mean and peak per country, complete local days only.
+    columns:
+      - name: load_day_key
+        data_tests:
+          - not_null
+          - unique
+      - name: country_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["ES", "PT"]
+      - name: local_date
+        data_tests:
+          - not_null
+          - recency:
+              arguments:
+                at_least: "2020-09-29"
+      - name: n_hours
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [23, 24, 25]
+                quote: false
+      - name: total_mwh
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 50000
+                max_value: 1200000
+      - name: peak_local_hour
+        data_tests:
+          - accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 23

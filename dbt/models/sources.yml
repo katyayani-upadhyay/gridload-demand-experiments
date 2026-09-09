@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: opsd
+    description: Open Power System Data time_series package, 60 minute resolution, release 2020-10-06.
+    schema: raw
+    loaded_at_field: ingested_at
+    freshness:
+      warn_after: { count: 7, period: day }
+      error_after: { count: 30, period: day }
+    tables:
+      - name: opsd_load_hourly
+        description: One row per UTC hour with ENTSO-E transparency actual load for Spain and Portugal.
+        columns:
+          - name: utc_timestamp
+            data_tests:
+              - not_null
+              - unique
+          - name: ingested_at
+            data_tests:
+              - not_null

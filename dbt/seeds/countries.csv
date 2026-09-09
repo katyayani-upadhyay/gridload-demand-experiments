@@ -1,0 +1,3 @@
+country_code,country_name,timezone,standard_utc_offset_hours,min_plausible_load_mw,max_plausible_load_mw
+ES,Spain,Europe/Madrid,1,15000,45000
+PT,Portugal,Europe/Lisbon,0,2500,10000

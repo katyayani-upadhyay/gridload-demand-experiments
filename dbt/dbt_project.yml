@@ -1,0 +1,35 @@
+name: gridload
+version: "1.0.0"
+config-version: 2
+profile: gridload
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  gridload:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: table
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+
+seeds:
+  gridload:
+    +schema: seeds
+    countries:
+      +column_types:
+        country_code: varchar
+        country_name: varchar
+        timezone: varchar
+        standard_utc_offset_hours: integer
+        min_plausible_load_mw: double
+        max_plausible_load_mw: double
