@@ -1,0 +1,44 @@
+{
+  "did": {
+    "specification": "yoy",
+    "coefficient": -0.02190328745338602,
+    "std_error": 0.032056833979659284,
+    "ci_low": -0.08473352751189803,
+    "ci_high": 0.040926952605125994,
+    "p_value": 0.49443990310969654,
+    "effect_pct": -0.021665152269415056,
+    "effect_ci_low_pct": -0.08124292473119872,
+    "effect_ci_high_pct": 0.04177600374287851,
+    "n_obs": 5806,
+    "n_clusters": 36,
+    "pre_start": "2020-01-01",
+    "event_date": "2020-03-14",
+    "post_end": "2020-04-30"
+  },
+  "did_levels_sensitivity": {
+    "specification": "levels",
+    "coefficient": -0.02490807295487468,
+    "std_error": 0.035719301583072224,
+    "ci_low": -0.09491661761062078,
+    "ci_high": 0.04510047170087142,
+    "p_value": 0.4855974820828095,
+    "effect_pct": -0.02460042649227884,
+    "effect_ci_low_pct": -0.09055123668230444,
+    "effect_ci_high_pct": 0.04613296138673458,
+    "n_obs": 5806,
+    "n_clusters": 36,
+    "pre_start": "2020-01-01",
+    "event_date": "2020-03-14",
+    "post_end": "2020-04-30"
+  },
+  "pre_trend_slope_per_year": -0.00627668342433551,
+  "pre_trend_slope_p_value": 8.293472535579696e-06,
+  "year_over_year_change": {
+    "ES": -0.1381435361869673,
+    "PT": -0.09362856421781618
+  },
+  "published_range_pct": [
+    -0.135,
+    -0.11
+  ]
+}
