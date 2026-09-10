@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: |
+          uv venv --python 3.11 .venv
+          uv pip install --python .venv/bin/python -e ".[dev]"
+
+      - name: Lint
+        run: make lint
+
+      - name: Unit tests
+        run: make pytest
+
+      - name: Cache OPSD download
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: opsd-time_series_60min-2020-10-06
+
+      - name: Ingest
+        run: make ingest
+
+      - name: dbt build
+        run: .venv/bin/dbt build --project-dir dbt --profiles-dir dbt
+
+      - name: Forecast backtest smoke test
+        run: make forecast-smoke
+
+      - name: Experiment and causal steps
+        run: make experiment causal
