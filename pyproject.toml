@@ -24,7 +24,7 @@ dependencies = [
     "statsmodels>=0.14",
     "holidays>=0.50",
     "matplotlib>=3.8",
-    "streamlit>=1.36",
+    "streamlit>=1.50",
     "plotly>=5.22",
 ]
 
