@@ -138,3 +138,50 @@ analysis on strong evidence, not on ordinary sampling noise at 0.05.
 peak reduction entirely below zero, and every guardrail passing. Guardrails
 are conservation (total daily kWh must not increase), rebound below half the
 peak reduction, and an opt-out increase under three percentage points.
+
+## P4: causal inference
+
+**Year-over-year specification as the headline DiD.** The first estimate used
+log load in levels with hour and weekday fixed effects and compared January to
+mid-March against mid-March to April. The event study showed the Spain minus
+Portugal gap has its own seasonal cycle (Spain's summer cooling load is
+larger), so that comparison mixes the lockdown with the spring swing.
+Differencing each hour against the same local hour 364 days earlier removes
+each country's own seasonal profile and keeps weekdays aligned. The levels
+estimate is still reported as a sensitivity check.
+
+**Portugal was treated too, and the numbers say so.** Spain's raw load fell
+13.8 percent year-over-year over 14 March to 30 April 2020 and Portugal's fell
+9.4 percent. The DiD of about minus 2 percent is the part of Spain's decline
+that exceeds Portugal's after netting out the 3 point gap that already existed
+in January to March 2020. That is the honest estimand; the raw Spanish figure
+is what press releases report and is what the sanity check compares against.
+
+**Weekly event study normalised to the pre-period mean, not a single week.**
+The week before the state of alarm was distorted by Carnival falling in a
+different week of 2019, which shifted every coefficient when it served as the
+reference. Averaging the pre-event weeks to zero removes the dependence on one
+noisy week. The dynamics matter more than the window average: the effect
+concentrates in the two weeks of Spain's total shutdown of non-essential
+activity (30 March to 12 April), at roughly minus 8 to minus 9 percent.
+
+**Per-country holiday indicators for both the current and prior-year date.**
+Easter moved from 21 April 2019 to 12 April 2020, so a 364-day shift lines a
+holiday up with an ordinary day. Flags for each country's own calendar on both
+dates absorb that.
+
+**Cluster by country x week.** Two countries are too few clusters, and hourly
+observations within a week are strongly serially correlated. Week clusters give
+36 groups and honest, wide confidence intervals.
+
+## P5: orchestration
+
+**A plain function per step, an argparse entry point, and a Makefile.** The
+orchestrator has no scheduler, retries or state: each step is a function taking
+`Settings`, and `run()` just calls them in order and logs timings. An Airflow
+DAG can wrap each function in a PythonOperator later. dbt is invoked as a
+subprocess through the same interpreter so the venv is always the one used.
+
+**Long runs are wrapped in `caffeinate` locally.** Several multi-minute steps
+took hours of wall-clock time during development with almost no CPU. The cause
+was the laptop idling, not the code; the Makefile does not depend on it.
