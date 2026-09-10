@@ -5,7 +5,12 @@ import pandas as pd
 import pytest
 
 from gridload.experiments.analyze import analyse
-from gridload.experiments.simulate import ARM_CONTROL, ARM_TREATMENT, SimulationConfig, simulate_households
+from gridload.experiments.simulate import (
+    ARM_CONTROL,
+    ARM_TREATMENT,
+    SimulationConfig,
+    simulate_households,
+)
 from gridload.experiments.stats import (
     cuped_adjust,
     minimum_detectable_effect,
@@ -55,7 +60,9 @@ def test_cuped_leaves_treatment_effect_unbiased() -> None:
     households = simulate_households(config)
     control = households["arm"] == ARM_CONTROL
     adjusted, _ = cuped_adjust(households["peak_kwh_post"], households["peak_kwh_pre"])
-    raw = welch_difference(households.loc[control, "peak_kwh_post"], households.loc[~control, "peak_kwh_post"], "raw")
+    raw = welch_difference(
+        households.loc[control, "peak_kwh_post"], households.loc[~control, "peak_kwh_post"], "raw"
+    )
     cuped = welch_difference(adjusted[control], adjusted[~control], "cuped")
     assert cuped.difference == pytest.approx(raw.difference, abs=0.02)
     assert (cuped.ci_high - cuped.ci_low) < (raw.ci_high - raw.ci_low)
@@ -85,13 +92,18 @@ def test_simulation_is_reproducible_and_effect_is_recovered() -> None:
     pd.testing.assert_frame_equal(first, second)
 
     results = analyse(first, config)
-    truth = -config.true_peak_reduction_pct * first.loc[first["arm"] == ARM_CONTROL, "peak_kwh_post"].mean()
+    truth = (
+        -config.true_peak_reduction_pct
+        * first.loc[first["arm"] == ARM_CONTROL, "peak_kwh_post"].mean()
+    )
     assert results.primary_cuped.ci_low < truth < results.primary_cuped.ci_high
     assert results.srm.passed
     assert first["arm"].isin([ARM_CONTROL, ARM_TREATMENT]).all()
 
 
 def test_null_effect_does_not_ship() -> None:
-    config = SimulationConfig(n_households=6000, true_peak_reduction_pct=0.0, effect_heterogeneity_sd=0.0, seed=5)
+    config = SimulationConfig(
+        n_households=6000, true_peak_reduction_pct=0.0, effect_heterogeneity_sd=0.0, seed=5
+    )
     results = analyse(simulate_households(config), config)
     assert not results.ship

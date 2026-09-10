@@ -66,9 +66,7 @@ def minimum_detectable_effect(
     return float(effect_size * sd)
 
 
-def power_for_effect(
-    effect: float, sd: float, n_per_arm: int, alpha: float = 0.05
-) -> float:
+def power_for_effect(effect: float, sd: float, n_per_arm: int, alpha: float = 0.05) -> float:
     return float(
         TTestIndPower().power(effect_size=effect / sd, nobs1=n_per_arm, alpha=alpha, ratio=1.0)
     )
@@ -106,9 +104,7 @@ def sample_ratio_mismatch(
     no downstream estimate can be trusted, so only strong evidence should stop
     the analysis."""
     total = n_control + n_treatment
-    expected = np.array(
-        [total * (1 - expected_treatment_share), total * expected_treatment_share]
-    )
+    expected = np.array([total * (1 - expected_treatment_share), total * expected_treatment_share])
     chi2, p_value = stats.chisquare([n_control, n_treatment], expected)
     return SrmCheck(
         n_control=n_control,

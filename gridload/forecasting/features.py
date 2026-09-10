@@ -51,9 +51,7 @@ def build_features(frame: pd.DataFrame, holiday_dates: set[date]) -> pd.DataFram
     for lag in LAG_HOURS:
         out[f"lag_{lag}h"] = y.shift(lag)
 
-    same_hour = pd.concat(
-        [y.shift(168 * k) for k in range(1, SAME_HOUR_WEEKS + 1)], axis=1
-    )
+    same_hour = pd.concat([y.shift(168 * k) for k in range(1, SAME_HOUR_WEEKS + 1)], axis=1)
     out["same_hour_mean_4w"] = same_hour.mean(axis=1)
     out["same_hour_std_4w"] = same_hour.std(axis=1)
 

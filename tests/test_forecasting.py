@@ -83,7 +83,11 @@ def test_backtest_trains_only_on_hours_before_each_block(
     result = rolling_backtest(features, {"seasonal_naive": RecordingModel}, config)
 
     assert len(seen) == 3
-    block_starts = [pd.Timestamp("2019-03-01"), pd.Timestamp("2019-03-08"), pd.Timestamp("2019-03-15")]
+    block_starts = [
+        pd.Timestamp("2019-03-01"),
+        pd.Timestamp("2019-03-08"),
+        pd.Timestamp("2019-03-15"),
+    ]
     for last_train_hour, block_start in zip(seen, block_starts, strict=True):
         assert last_train_hour + pd.Timedelta(hours=1) < block_start
     assert result["local_date"].min() == date(2019, 3, 1)

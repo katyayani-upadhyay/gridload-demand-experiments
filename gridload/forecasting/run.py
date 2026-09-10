@@ -35,7 +35,9 @@ def run_forecast(settings: Settings | None = None, smoke: bool = False) -> pd.Da
     years = range(hourly.index.min().year, hourly.index.max().year + 2)
     features = build_features(hourly, spain_holidays(years))
 
-    log.info("backtest %s to %s, refit every %d days", config.start, config.end, config.refit_every_days)
+    log.info(
+        "backtest %s to %s, refit every %d days", config.start, config.end, config.refit_every_days
+    )
     predictions = rolling_backtest(
         features,
         {"seasonal_naive": SeasonalNaiveForecaster, "lightgbm": LightGBMForecaster},
@@ -45,7 +47,10 @@ def run_forecast(settings: Settings | None = None, smoke: bool = False) -> pd.Da
     overall = summarise(predictions, "actual", MODEL_NAMES)
     by_hour = summarise(predictions, "actual", MODEL_NAMES, by="local_hour")
     by_year = summarise(
-        predictions.assign(year=predictions["local_timestamp"].dt.year), "actual", MODEL_NAMES, by="year"
+        predictions.assign(year=predictions["local_timestamp"].dt.year),
+        "actual",
+        MODEL_NAMES,
+        by="year",
     )
 
     final_model = LightGBMForecaster()
@@ -94,9 +99,7 @@ def _write_reports(
         "|---|---|---|---|",
     ]
     for row in overall.itertuples():
-        lines.append(
-            f"| {row.model} | {row.wape:.2%} | {row.mape:.2%} | {row.bias_pct:+.2%} |"
-        )
+        lines.append(f"| {row.model} | {row.wape:.2%} | {row.mape:.2%} | {row.bias_pct:+.2%} |")
     (reports / "forecast_metrics.md").write_text("\n".join(lines) + "\n")
 
 

@@ -26,8 +26,14 @@ log = logging.getLogger("gridload.pipeline")
 def _dbt(settings: Settings, *args: str) -> None:
     env = {**os.environ, "GRIDLOAD_DUCKDB_PATH": str(settings.duckdb_path)}
     command = [
-        sys.executable, "-m", "dbt.cli.main", *args,
-        "--project-dir", str(settings.dbt_dir), "--profiles-dir", str(settings.dbt_dir),
+        sys.executable,
+        "-m",
+        "dbt.cli.main",
+        *args,
+        "--project-dir",
+        str(settings.dbt_dir),
+        "--profiles-dir",
+        str(settings.dbt_dir),
     ]
     subprocess.run(command, check=True, cwd=PROJECT_ROOT, env=env)
 
@@ -82,7 +88,10 @@ def run(steps: list[str], settings: Settings, smoke: bool = False) -> None:
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Run gridload pipeline steps in order.")
     parser.add_argument(
-        "steps", nargs="*", choices=[*STEPS, "all"], default=["all"],
+        "steps",
+        nargs="*",
+        choices=[*STEPS, "all"],
+        default=["all"],
         help="steps to run, in pipeline order; default all",
     )
     parser.add_argument("--smoke", action="store_true", help="short forecast backtest for CI")

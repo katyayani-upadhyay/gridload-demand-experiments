@@ -128,7 +128,9 @@ def test_weekly_event_study_is_flat_before_and_shifted_after() -> None:
 def test_holiday_controls_only_enter_when_they_vary() -> None:
     hourly = _analysis_window(_synthetic_hourly(-0.05))
     calendars = {"ES": {date(2020, 4, 10)}, "PT": {date(2020, 4, 10)}}
-    with_holidays = estimate_did(hourly, date(2020, 3, 14), holiday_calendars=calendars, specification="levels")
+    with_holidays = estimate_did(
+        hourly, date(2020, 3, 14), holiday_calendars=calendars, specification="levels"
+    )
     without = estimate_did(hourly, date(2020, 3, 14), specification="levels")
     assert with_holidays.coefficient == pytest.approx(without.coefficient, abs=0.01)
 

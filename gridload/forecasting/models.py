@@ -62,7 +62,9 @@ class LightGBMForecaster:
         self.columns = feature_columns(train)
         usable = train.dropna(subset=self.columns + [TARGET])
         dataset = lgb.Dataset(
-            as_matrix(usable, self.columns), label=usable[TARGET].to_numpy(), feature_name=self.columns
+            as_matrix(usable, self.columns),
+            label=usable[TARGET].to_numpy(),
+            feature_name=self.columns,
         )
         self.model = lgb.train(self.params, dataset, num_boost_round=self.num_rounds)
 

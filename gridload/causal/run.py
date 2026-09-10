@@ -61,7 +61,10 @@ def run_causal(settings: Settings | None = None) -> DidResult:
     )
     weekly_yoy = add_year_over_year_change(weekly_window)
     weekly = weekly_event_study(
-        weekly_yoy[weekly_yoy["local_date"] >= pd.Timestamp(PRE_START)], EVENT_DATE, TREATED, calendars
+        weekly_yoy[weekly_yoy["local_date"] >= pd.Timestamp(PRE_START)],
+        EVENT_DATE,
+        TREATED,
+        calendars,
     )
 
     daily = load_daily_panel(settings.duckdb_path)
@@ -105,10 +108,26 @@ def _plot_event_study(study: pd.DataFrame, weekly: pd.DataFrame, path: Path) -> 
     top.axhline(0, color="#666666", linewidth=0.8)
     top.axvline(pd.Timestamp(EVENT_DATE), color="#b3261e", linestyle="--", linewidth=1)
     top.fill_between(x, study["ci_low"], study["ci_high"], color="#4c72b0", alpha=0.18, linewidth=0)
-    top.plot(x[pre], study.loc[pre, "coefficient"], marker="o", markersize=3, color="#4c72b0", label="pre-event")
-    top.plot(x[~pre], study.loc[~pre, "coefficient"], marker="o", markersize=3, color="#b3261e", label="post-event")
+    top.plot(
+        x[pre],
+        study.loc[pre, "coefficient"],
+        marker="o",
+        markersize=3,
+        color="#4c72b0",
+        label="pre-event",
+    )
+    top.plot(
+        x[~pre],
+        study.loc[~pre, "coefficient"],
+        marker="o",
+        markersize=3,
+        color="#b3261e",
+        label="post-event",
+    )
     top.set_ylabel("ES minus PT log daily load,\nseasonally adjusted, vs Feb 2020")
-    top.set_title("Pre-trends 2015-2020: monthly Spain-Portugal gap in log load (95% CI, Newey-West)")
+    top.set_title(
+        "Pre-trends 2015-2020: monthly Spain-Portugal gap in log load (95% CI, Newey-West)"
+    )
     top.legend(loc="lower left", frameon=False)
     top.grid(axis="y", alpha=0.3)
 
@@ -117,18 +136,34 @@ def _plot_event_study(study: pd.DataFrame, weekly: pd.DataFrame, path: Path) -> 
     bottom.axhline(0, color="#666666", linewidth=0.8)
     bottom.axvline(-0.5, color="#b3261e", linestyle="--", linewidth=1)
     bottom.errorbar(
-        wx[wpre], weekly.loc[wpre, "coefficient"],
-        yerr=[weekly.loc[wpre, "coefficient"] - weekly.loc[wpre, "ci_low"], weekly.loc[wpre, "ci_high"] - weekly.loc[wpre, "coefficient"]],
-        fmt="o", color="#4c72b0", capsize=3, label="pre-event",
+        wx[wpre],
+        weekly.loc[wpre, "coefficient"],
+        yerr=[
+            weekly.loc[wpre, "coefficient"] - weekly.loc[wpre, "ci_low"],
+            weekly.loc[wpre, "ci_high"] - weekly.loc[wpre, "coefficient"],
+        ],
+        fmt="o",
+        color="#4c72b0",
+        capsize=3,
+        label="pre-event",
     )
     bottom.errorbar(
-        wx[~wpre], weekly.loc[~wpre, "coefficient"],
-        yerr=[weekly.loc[~wpre, "coefficient"] - weekly.loc[~wpre, "ci_low"], weekly.loc[~wpre, "ci_high"] - weekly.loc[~wpre, "coefficient"]],
-        fmt="o", color="#b3261e", capsize=3, label="post-event",
+        wx[~wpre],
+        weekly.loc[~wpre, "coefficient"],
+        yerr=[
+            weekly.loc[~wpre, "coefficient"] - weekly.loc[~wpre, "ci_low"],
+            weekly.loc[~wpre, "ci_high"] - weekly.loc[~wpre, "coefficient"],
+        ],
+        fmt="o",
+        color="#b3261e",
+        capsize=3,
+        label="post-event",
     )
     bottom.set_xlabel("Weeks from the week of 14 March 2020")
     bottom.set_ylabel("Differential year-over-year\nlog change, ES minus PT")
-    bottom.set_title("Event study 2020: weekly differential effect, pre-event weeks normalised to zero (95% CI)")
+    bottom.set_title(
+        "Event study 2020: weekly differential effect, pre-event weeks normalised to zero (95% CI)"
+    )
     bottom.legend(loc="lower left", frameon=False)
     bottom.grid(axis="y", alpha=0.3)
 
@@ -183,7 +218,8 @@ def _results_document(
         "",
         "| Quantity | Value |",
         "|---|---|",
-        f"| DiD coefficient, year-over-year spec (log points) | {r.coefficient:+.4f} (SE {r.std_error:.4f}) |",
+        "| DiD coefficient, year-over-year spec (log points) | "
+        f"{r.coefficient:+.4f} (SE {r.std_error:.4f}) |",
         f"| Differential effect on load | **{r.effect_pct:+.2%}** |",
         f"| 95% CI | [{r.effect_ci_low_pct:+.2%}, {r.effect_ci_high_pct:+.2%}] |",
         f"| p-value | {r.p_value:.2e} |",
@@ -215,7 +251,9 @@ def _results_document(
         "|---|---|---|",
     ]
     for row in post.itertuples():
-        lines.append(f"| {row.month} | {row.coefficient:+.4f} | [{row.ci_low:+.4f}, {row.ci_high:+.4f}] |")
+        lines.append(
+            f"| {row.month} | {row.coefficient:+.4f} | [{row.ci_low:+.4f}, {row.ci_high:+.4f}] |"
+        )
     peak = weekly.loc[weekly["coefficient"].idxmin()]
     lines += [
         "",
@@ -228,9 +266,16 @@ def _results_document(
         "| Weeks from event | Week starting | Coefficient | 95% CI |",
         "|---|---|---|---|",
     ]
-    for row in weekly[(weekly["weeks_from_event"] >= -4) & (weekly["weeks_from_event"] <= 8)].itertuples():
-        interval = "reference week" if np.isnan(row.ci_low) else f"[{row.ci_low:+.4f}, {row.ci_high:+.4f}]"
-        lines.append(f"| {row.weeks_from_event:+d} | {row.week_start} | {row.coefficient:+.4f} | {interval} |")
+    for row in weekly[
+        (weekly["weeks_from_event"] >= -4) & (weekly["weeks_from_event"] <= 8)
+    ].itertuples():
+        interval = (
+            "reference week" if np.isnan(row.ci_low) else f"[{row.ci_low:+.4f}, {row.ci_high:+.4f}]"
+        )
+        lines.append(
+            f"| {row.weeks_from_event:+d} | {row.week_start} | {row.coefficient:+.4f} "
+            f"| {interval} |"
+        )
     lines += [
         "",
         f"The differential effect peaks in the week starting {peak['week_start']} at "

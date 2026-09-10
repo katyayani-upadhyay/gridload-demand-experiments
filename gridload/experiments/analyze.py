@@ -44,7 +44,12 @@ class GuardrailResult:
     passed: bool
 
     def to_dict(self) -> dict[str, object]:
-        return {"name": self.name, "rule": self.rule, "passed": self.passed, **self.estimate.to_dict()}
+        return {
+            "name": self.name,
+            "rule": self.rule,
+            "passed": self.passed,
+            **self.estimate.to_dict(),
+        }
 
 
 @dataclass(frozen=True)
@@ -89,7 +94,9 @@ def peak_hours_from_load(
     with duckdb.connect(str(duckdb_path), read_only=True) as con:
         mean_by_hour = dict(con.execute(query, [country_code]).fetchall())
     candidates = range(earliest_start, 24 - window_hours + 1)
-    best_start = max(candidates, key=lambda h: sum(mean_by_hour[k] for k in range(h, h + window_hours)))
+    best_start = max(
+        candidates, key=lambda h: sum(mean_by_hour[k] for k in range(h, h + window_hours))
+    )
     return tuple(range(best_start, best_start + window_hours))
 
 
@@ -116,7 +123,9 @@ def analyse(households: pd.DataFrame, config: SimulationConfig) -> ExperimentRes
     )
 
     total_adj, _ = cuped_adjust(households["total_kwh_post"], households["total_kwh_pre"])
-    total = welch_difference(total_adj[control.index], total_adj[treatment.index], "total_kwh_per_day", ALPHA)
+    total = welch_difference(
+        total_adj[control.index], total_adj[treatment.index], "total_kwh_per_day", ALPHA
+    )
     offpeak_adj, _ = cuped_adjust(households["offpeak_kwh_post"], households["offpeak_kwh_pre"])
     offpeak = welch_difference(
         offpeak_adj[control.index], offpeak_adj[treatment.index], "offpeak_kwh_per_day", ALPHA
@@ -153,11 +162,7 @@ def analyse(households: pd.DataFrame, config: SimulationConfig) -> ExperimentRes
         ),
     ]
 
-    ship = (
-        srm.passed
-        and primary_cuped.ci_high < 0
-        and all(g.passed for g in guardrails)
-    )
+    ship = srm.passed and primary_cuped.ci_high < 0 and all(g.passed for g in guardrails)
     return ExperimentResults(
         config, srm, power, primary, primary_cuped, variance_reduction, guardrails, ship
     )
@@ -204,7 +209,8 @@ def decision_document(r: ExperimentResults) -> str:
         "## Design",
         "",
         f"- {r.config.n_households} synthetic households randomised "
-        f"{1 - r.config.treatment_share:.0%}/{r.config.treatment_share:.0%} to control / treatment.",
+        f"{1 - r.config.treatment_share:.0%}/{r.config.treatment_share:.0%} "
+        "to control / treatment.",
         f"- Treatment: peak-time rebate plus smart-meter nudge during {hours} local time "
         "(the highest-load four-hour evening block of the Spanish system in 2019).",
         f"- Pre-period {r.config.pre_days} days, experiment period {r.config.post_days} days.",

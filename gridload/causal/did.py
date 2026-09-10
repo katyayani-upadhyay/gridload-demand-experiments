@@ -107,13 +107,15 @@ def _holiday_flags(
     if not calendars:
         return []
     frame["is_holiday"] = [
-        d in calendars.get(c, set()) for c, d in zip(frame["country_code"], frame["local_date"].dt.date, strict=True)
+        d in calendars.get(c, set())
+        for c, d in zip(frame["country_code"], frame["local_date"].dt.date, strict=True)
     ]
     terms = ["is_holiday"]
     if include_prior and "local_timestamp_prior" in frame:
         prior_dates = frame["local_timestamp_prior"].dt.date
         frame["is_holiday_prior"] = [
-            d in calendars.get(c, set()) for c, d in zip(frame["country_code"], prior_dates, strict=True)
+            d in calendars.get(c, set())
+            for c, d in zip(frame["country_code"], prior_dates, strict=True)
         ]
         terms.append("is_holiday_prior")
     for term in terms:
@@ -143,7 +145,9 @@ def estimate_did(
     frame["treated"] = (frame["country_code"] == treated).astype(int)
     frame["post"] = (frame["local_date"] >= pd.Timestamp(event_date)).astype(int)
     iso = frame["local_date"].dt.isocalendar()
-    frame["cluster"] = frame["country_code"] + "_" + iso["year"].astype(str) + "_" + iso["week"].astype(str)
+    frame["cluster"] = (
+        frame["country_code"] + "_" + iso["year"].astype(str) + "_" + iso["week"].astype(str)
+    )
 
     if specification == "yoy":
         if "yoy_log_change" not in frame:
@@ -213,13 +217,19 @@ def monthly_gap_event_study(
     gap["month"] = gap.index.to_period("M").astype(str)
     gap["month"] = pd.Categorical(gap["month"], categories=sorted(gap["month"].unique()))
 
-    model = smf.ols(
-        f"gap ~ C(month, Treatment(reference='{reference_month}'))", data=gap
-    ).fit(cov_type="HAC", cov_kwds={"maxlags": 14})
+    model = smf.ols(f"gap ~ C(month, Treatment(reference='{reference_month}'))", data=gap).fit(
+        cov_type="HAC", cov_kwds={"maxlags": 14}
+    )
     ci = model.conf_int()
 
     rows = [
-        {"month": reference_month, "coefficient": 0.0, "std_error": np.nan, "ci_low": np.nan, "ci_high": np.nan}
+        {
+            "month": reference_month,
+            "coefficient": 0.0,
+            "std_error": np.nan,
+            "ci_low": np.nan,
+            "ci_high": np.nan,
+        }
     ]
     for name, value in model.params.items():
         if name == "Intercept":
@@ -259,17 +269,27 @@ def weekly_event_study(
     frame["treated"] = (frame["country_code"] == treated).astype(int)
     week_start = frame["local_date"] - pd.to_timedelta(frame["local_date"].dt.dayofweek, unit="D")
     frame["week"] = week_start.dt.strftime("%Y-%m-%d")
-    event_week_start = pd.Timestamp(event_date) - pd.Timedelta(days=pd.Timestamp(event_date).dayofweek)
+    event_week_start = pd.Timestamp(event_date) - pd.Timedelta(
+        days=pd.Timestamp(event_date).dayofweek
+    )
     reference = (event_week_start - pd.Timedelta(days=7)).strftime("%Y-%m-%d")
     frame["cluster"] = frame["country_code"] + "_" + frame["local_date"].dt.strftime("%Y-%m-%d")
     controls = _holiday_flags(frame, holiday_calendars, include_prior=True)
     formula = " + ".join(
         [f"yoy_log_change ~ treated * C(week, Treatment(reference='{reference}'))", *controls]
     )
-    model = smf.ols(formula, data=frame).fit(cov_type="cluster", cov_kwds={"groups": frame["cluster"]})
+    model = smf.ols(formula, data=frame).fit(
+        cov_type="cluster", cov_kwds={"groups": frame["cluster"]}
+    )
     ci = model.conf_int()
     rows = [
-        {"week_start": reference, "coefficient": 0.0, "std_error": np.nan, "ci_low": np.nan, "ci_high": np.nan}
+        {
+            "week_start": reference,
+            "coefficient": 0.0,
+            "std_error": np.nan,
+            "ci_low": np.nan,
+            "ci_high": np.nan,
+        }
     ]
     for name, value in model.params.items():
         if not name.startswith("treated:C(week"):
@@ -286,8 +306,8 @@ def weekly_event_study(
         )
     study = pd.DataFrame(rows).sort_values("week_start").reset_index(drop=True)
     study["weeks_from_event"] = (
-        (pd.to_datetime(study["week_start"]) - event_week_start).dt.days // 7
-    )
+        pd.to_datetime(study["week_start"]) - event_week_start
+    ).dt.days // 7
     study["is_post"] = study["weeks_from_event"] >= 0
     pre_mean = study.loc[~study["is_post"], "coefficient"].mean()
     for col in ("coefficient", "ci_low", "ci_high"):
@@ -306,9 +326,7 @@ def pre_trend_slope(study: pd.DataFrame) -> tuple[float, float]:
     return float(fit.params["t_years"]), float(fit.pvalues["t_years"])
 
 
-def year_over_year_change(
-    daily: pd.DataFrame, country: str, start: date, end: date
-) -> float:
+def year_over_year_change(daily: pd.DataFrame, country: str, start: date, end: date) -> float:
     """Raw change in mean load versus the same calendar window one year earlier.
 
     This is what press releases report and what the DiD is sanity-checked
