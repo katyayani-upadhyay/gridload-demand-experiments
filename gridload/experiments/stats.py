@@ -63,13 +63,13 @@ def minimum_detectable_effect(
     effect_size = TTestIndPower().solve_power(
         effect_size=None, nobs1=n_per_arm, alpha=alpha, power=power, ratio=1.0
     )
-    return float(effect_size * sd)
+    # statsmodels returns a scalar or a one-element array depending on version.
+    return float(np.squeeze(effect_size)) * sd
 
 
 def power_for_effect(effect: float, sd: float, n_per_arm: int, alpha: float = 0.05) -> float:
-    return float(
-        TTestIndPower().power(effect_size=effect / sd, nobs1=n_per_arm, alpha=alpha, ratio=1.0)
-    )
+    power = TTestIndPower().power(effect_size=effect / sd, nobs1=n_per_arm, alpha=alpha, ratio=1.0)
+    return float(np.squeeze(power))
 
 
 def power_analysis(
