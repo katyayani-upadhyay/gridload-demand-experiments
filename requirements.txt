@@ -1,0 +1,6 @@
+# Dashboard-only dependencies for Streamlit Community Cloud. The full pipeline
+# environment is defined in pyproject.toml.
+streamlit>=1.36
+plotly>=5.22
+pandas>=2.2
+pyarrow>=17
