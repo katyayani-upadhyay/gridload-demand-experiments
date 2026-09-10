@@ -1,0 +1,116 @@
+{
+  "simulated": true,
+  "config": {
+    "n_households": 4000,
+    "treatment_share": 0.5,
+    "pre_days": 28,
+    "post_days": 28,
+    "peak_hours": [
+      18,
+      19,
+      20,
+      21
+    ],
+    "median_daily_kwh": 9.0,
+    "household_log_sd": 0.45,
+    "peak_share": 0.32,
+    "daily_noise_cv": 0.35,
+    "true_peak_reduction_pct": 0.06,
+    "effect_heterogeneity_sd": 0.03,
+    "rebound_share": 0.4,
+    "control_opt_out_rate": 0.01,
+    "treatment_opt_out_rate": 0.03,
+    "seed": 2024
+  },
+  "srm": {
+    "n_control": 2010,
+    "n_treatment": 1990,
+    "expected_treatment_share": 0.5,
+    "chi2": 0.1,
+    "p_value": 0.7518296340458492,
+    "passed": true
+  },
+  "power": {
+    "alpha": 0.05,
+    "power": 0.8,
+    "n_per_arm": 1990,
+    "pooled_sd": 1.498378027589686,
+    "mde_absolute": 0.13311225175378014,
+    "mde_relative": 0.041692252729502596,
+    "power_at_planned_effect": 0.919224070715184,
+    "planned_effect_relative": 0.05
+  },
+  "primary_unadjusted": {
+    "metric": "peak_kwh_per_day",
+    "control_mean": 3.1927334945752692,
+    "treatment_mean": 3.0160793625308924,
+    "difference": -0.17665413204437685,
+    "relative_lift": -0.055330058817789685,
+    "ci_low": -0.2678879349810472,
+    "ci_high": -0.08542032910770651,
+    "p_value": 0.00014911780789895657,
+    "n_control": 2010,
+    "n_treatment": 1990
+  },
+  "primary_cuped": {
+    "metric": "peak_kwh_per_day_cuped",
+    "control_mean": 3.200066013846853,
+    "treatment_mean": 3.008673149598288,
+    "difference": -0.19139286424856516,
+    "relative_lift": -0.059809036257501634,
+    "ci_low": -0.21152626881464054,
+    "ci_high": -0.1712594596824898,
+    "p_value": 2.0861187365195894e-74,
+    "n_control": 2010,
+    "n_treatment": 1990
+  },
+  "cuped_variance_reduction": 0.9472705118022304,
+  "guardrails": [
+    {
+      "name": "conservation",
+      "rule": "total daily kWh must not increase (CI upper bound <= 0)",
+      "passed": true,
+      "metric": "total_kwh_per_day",
+      "control_mean": 10.021802899225063,
+      "treatment_mean": 9.870123466750861,
+      "difference": -0.1516794324742019,
+      "relative_lift": -0.015134944680056573,
+      "ci_low": -0.19877813145652792,
+      "ci_high": -0.10458073349187588,
+      "p_value": 3.0181034669270684e-10,
+      "n_control": 2010,
+      "n_treatment": 1990
+    },
+    {
+      "name": "off_peak_rebound",
+      "rule": "off-peak increase must be under 50% of the peak reduction",
+      "passed": true,
+      "metric": "offpeak_kwh_per_day",
+      "control_mean": 6.8215140637125975,
+      "treatment_mean": 6.861675378231915,
+      "difference": 0.04016131451931759,
+      "relative_lift": 0.00588744876052632,
+      "ci_low": -0.0033093502979322093,
+      "ci_high": 0.0836319793365674,
+      "p_value": 0.07016889830829383,
+      "n_control": 2010,
+      "n_treatment": 1990
+    },
+    {
+      "name": "opt_out",
+      "rule": "opt-out rate increase must be under 3.0% (CI upper bound)",
+      "passed": true,
+      "metric": "opt_out_rate",
+      "control_mean": 0.006965174129353234,
+      "treatment_mean": 0.02562814070351759,
+      "difference": 0.018662966574164355,
+      "relative_lift": 2.6794687724335966,
+      "ci_low": 0.010825674632278492,
+      "ci_high": 0.026500258516050215,
+      "p_value": 3.045383009913576e-06,
+      "n_control": 2010,
+      "n_treatment": 1990
+    }
+  ],
+  "ship": true
+}
