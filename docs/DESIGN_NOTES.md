@@ -185,3 +185,40 @@ subprocess through the same interpreter so the venv is always the one used.
 **Long runs are wrapped in `caffeinate` locally.** Several multi-minute steps
 took hours of wall-clock time during development with almost no CPU. The cause
 was the laptop idling, not the code; the Makefile does not depend on it.
+
+## P6: dashboard and deployment
+
+**The dashboard reads only `reports/`.** Streamlit Community Cloud has no
+DuckDB file, no OPSD download and no time budget for a LightGBM backtest. Every
+number and curve the page shows comes from the small CSV, JSON and Parquet
+artifacts the pipeline commits, so the live app is a faithful view of the last
+`make all` and deploys in seconds.
+
+**A dashboard-only `requirements.txt` next to the full `pyproject.toml`.**
+Community Cloud installs from `requirements.txt`; listing only Streamlit,
+Plotly, pandas and pyarrow keeps the cold start short and avoids compiling
+LightGBM or dbt on the hosting side.
+
+**The dashboard has a pytest smoke test.** `streamlit.testing.v1.AppTest`
+renders the whole app headlessly and fails on any exception, and a second test
+asserts every artifact the page reads is committed. A missing report file
+therefore breaks CI instead of the live page.
+
+## P7: CI and documentation
+
+**CI runs the real pipeline, not a mock.** The workflow downloads the OPSD CSV
+(cached by URL between runs), loads DuckDB, runs `dbt build` with all 56 tests,
+then a short forecast backtest plus the experiment and causal steps. The whole
+job takes about a minute, so there was no reason to stub anything.
+
+**Two CI-only failures and their fixes.** `astral-sh/setup-uv` pre-creates
+`.venv` when given a Python version, so `uv venv` now runs with `--clear`. And
+statsmodels' `solve_power` returned a one-element array on the runner where it
+returned a float locally; both power helpers now squeeze to a scalar. Neither
+showed up locally, which is the point of running the pipeline in CI.
+
+**README order follows the brief and stays under 1,500 words.** Live link
+first, architecture, problem framing, one metrics table per phase, stack,
+quickstart, the DST failure, limitations, references. The metrics are copied
+from the committed reports rather than re-derived so the README and the
+dashboard cannot disagree.
