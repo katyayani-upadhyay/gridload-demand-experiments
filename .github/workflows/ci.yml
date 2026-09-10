@@ -17,9 +17,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install
-        run: |
-          uv venv --python 3.11 .venv
-          uv pip install --python .venv/bin/python -e ".[dev]"
+        run: make setup
 
       - name: Lint
         run: make lint

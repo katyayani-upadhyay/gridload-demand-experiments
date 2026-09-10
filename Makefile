@@ -4,7 +4,7 @@ PIPELINE = $(PYTHON) scripts/run_pipeline.py
 .PHONY: setup ingest transform test forecast experiment causal dashboard all pytest lint clean
 
 setup:
-	uv venv --python 3.11 .venv
+	uv venv --python 3.11 --clear .venv
 	uv pip install --python .venv/bin/python -e ".[dev]"
 
 ingest:
